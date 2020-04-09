@@ -133,6 +133,7 @@
       },
       addFiles(files) {
         Promise.all([...files].map(loadImage)).then((imgs) => {
+          const lastImage = this.images[this.images.length - 1];
           imgs.forEach((img) => {
             this.images.push({
               src: img.src,
@@ -142,7 +143,7 @@
               layout: {},
             });
           });
-          this.gotoPage(this.pages.length - 1);
+          this.goto(lastImage);
         });
       },
     },
