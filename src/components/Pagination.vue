@@ -26,6 +26,7 @@
 	nav {
 		margin: 2em 0 1em;
 		text-align: center;
+		user-select: none;
 	}
 	nav > * {
 		display: inline-block;

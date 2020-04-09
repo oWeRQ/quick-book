@@ -34,7 +34,11 @@
           {src: 'demo/trees-on-mountain-640x852.jpg', width: 640, height: 852},
           {src: 'demo/wanna-beer-640x480.jpg', width: 640, height: 480},
           {src: 'demo/wood-relaxation-summer-bed-640x960.jpg', width: 640, height: 960},
-        ],
+        ].map((image) => ({
+          ...image,
+          ratio: image.width / image.height,
+          layout: {},
+        })),
       };
     },
     components: {

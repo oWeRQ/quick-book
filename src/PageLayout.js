@@ -32,7 +32,7 @@ export default class PageLayout {
   }
 
   processPage(page) {
-    page.sumRatio = page.images.reduce((acc, cur) => acc + (cur.ratio = cur.width / cur.height), 0);
+    page.sumRatio = page.images.reduce((acc, cur) => acc + cur.ratio, 0);
     page.rowsCount = Math.round(page.sumRatio / Math.sqrt(page.sumRatio * this.availRatio));
 
     this.processLayout(page);
