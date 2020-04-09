@@ -1,14 +1,14 @@
 <template>
   <div class="pages">
     <Pagination :total="pages.length" v-model="offset" />
-    <div class="book">
+    <div class="book" @dragover="dragover($event)" @drop="drop($event)">
       <div v-for="(page, index) in visiblePages" :key="index" class="page" :style="pageStyle">
         <transition-group name="image">
           <PageImage class="image" v-for="image in page.images" :key="image.src" :image="image" :canAdd="!!buffer.length" @before="before(image)" @after="after(image)" @cut="cut(image)" />
         </transition-group>
       </div>
       <div v-if="isNewPage" class="page" :style="pageStyle">
-        <div class="add" @click="after(images[images.length - 1])">Add</div>
+        <div class="add" @click="add()">Add</div>
       </div>
     </div>
     <div class="buffer">
@@ -21,6 +21,40 @@
   import PageLayout from '../PageLayout';
   import PageImage from './PageImage';
   import Pagination from './Pagination';
+
+  function selectFile(multiple) {
+    return new Promise(function(resolve, reject) {
+      try {
+        var input = document.createElement('input');
+        input.type = 'file';
+        input.multiple = multiple || false;
+        input.onchange = function(e) {
+          resolve(e.target.files || []);
+        }
+        input.click();
+      } catch (ex) {
+        reject(ex);
+      }
+    });
+  }
+
+  function loadImage(file) {
+    return new Promise(function(resolve, reject) {
+      try {
+        const reader = new FileReader()
+        reader.readAsDataURL(file)
+        reader.onloadend = () => {
+          const img = document.createElement('img')
+          img.src = reader.result;
+          img.onload = () => {
+            resolve(img);
+          };
+        };
+      } catch (ex) {
+        reject(ex);
+      }
+    });
+  }
 
   const scale = 0.6;
   const width = 210 * scale;
@@ -72,7 +106,36 @@
       cut(image) {
         const idx = this.images.indexOf(image);
         this.buffer = this.buffer.concat(this.images.splice(idx, 1));
-      }
+      },
+      add() {
+        console.log(this.buffer.length);
+        if (this.buffer.length) {
+          this.after(this.images[this.images.length - 1]);
+        } else {
+          selectFile(true).then(this.addFiles);
+        }
+      },
+      dragover(e) {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'copy';
+      },
+      drop(e) {
+        e.preventDefault();
+        this.addFiles(e.dataTransfer.files);
+      },
+      addFiles(files) {
+        Promise.all([...files].map(loadImage)).then((imgs) => {
+          imgs.forEach((img) => {
+            this.images.push({
+              src: img.src,
+              width: img.width,
+              height: img.height,
+              ratio: img.width / img.height,
+              layout: {},
+            });
+          });
+        });
+      },
     },
     components: {
       PageImage,
