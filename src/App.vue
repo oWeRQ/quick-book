@@ -44,5 +44,9 @@
 </script>
 
 <style>
-
+  body {
+    margin: 16px;
+    font: 14px Roboto, sans-serif;
+    background: #eee;
+  }
 </style>
