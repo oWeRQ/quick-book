@@ -1,15 +1,15 @@
 <template>
   <div class="wrap" :style="style">
     <img :src="image.src">
-    <div class="action before" @click="$emit('before')">Add</div>
-    <div class="action after" @click="$emit('after')">Add</div>
+    <div v-if="canAdd" class="action before" @click="$emit('before')">Add</div>
+    <div v-if="canAdd" class="action after" @click="$emit('after')">Add</div>
     <div class="action cut" @click="$emit('cut')">Cut</div>
   </div>
 </template>
 
 <script>
   export default {
-    props: ['image'],
+    props: ['image', 'canAdd'],
     computed: {
       style() {
         return {
@@ -61,15 +61,15 @@
   }
 
   .before {
-    left: -24px;
+    left: -16px;
     top: calc(50% - 24px);
   }
   .after {
-    right: -24px;
+    right: -16px;
     top: calc(50% - 24px);
   }
   .cut {
     left: calc(50% - 24px);
-    bottom: -24px;
+    bottom: -16px;
   }
 </style>

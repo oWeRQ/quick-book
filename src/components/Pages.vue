@@ -3,7 +3,9 @@
     <Pagination :total="pages.length" v-model="offset" />
     <div class="book">
       <div v-for="(page, index) in visiblePages" :key="index" class="page" :style="pageStyle">
-        <PageImage v-for="image in page.images" :key="image.src" :image="image" @before="before(image)" @after="after(image)" @cut="cut(image)" />
+        <transition-group name="image">
+          <PageImage class="image" v-for="image in page.images" :key="image.src" :image="image" :canAdd="!!buffer.length" @before="before(image)" @after="after(image)" @cut="cut(image)" />
+        </transition-group>
       </div>
     </div>
     <div class="buffer">
@@ -84,12 +86,21 @@
     box-shadow: 0 2px 8px rgba(0,0,0,.2);
   }
   .buffer {
+    overflow-x: scroll;
     display: flex;
     justify-content: center;
-    margin: 16px auto;
+    margin: 32px auto;
   }
   .buffer > * {
-    margin: 0 4px;
+    margin: 4px;
     height: 120px;
+  }
+  .image {
+    transform: scale(1);
+    transform-origin: center bottom;
+  }
+  .image-enter,
+  .image-leave-to {
+    transform: scale(0);
   }
 </style>
