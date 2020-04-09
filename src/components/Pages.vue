@@ -85,8 +85,17 @@
   .book {
     display: flex;
     justify-content: center;
+    flex-wrap: wrap;
+  }
+  @media (max-width: 480px) {
+    .book {
+      margin-bottom: -400px;
+      transform: scale(.7);
+      transform-origin: center top;
+    }
   }
   .page {
+    flex-shrink: 0;
     position: relative;
     background: white;
     box-shadow: 0 2px 8px rgba(0,0,0,.2);
