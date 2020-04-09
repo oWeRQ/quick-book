@@ -93,15 +93,23 @@
       },
     },
     methods: {
+      gotoPage(page) {
+        this.offset = Math.floor(page / 2);
+      },
+      goto(image) {
+        this.gotoPage(this.pages.findIndex((page) => page.images.includes(image)));
+      },
       before(image) {
         const idx = this.images.indexOf(image);
         this.images.splice(idx, 0, ...this.buffer);
         this.buffer = [];
+        this.goto(this.images[idx]);
       },
       after(image) {
         const idx = this.images.indexOf(image);
         this.images.splice(idx + 1, 0, ...this.buffer);
         this.buffer = [];
+        this.goto(this.images[idx + 1]);
       },
       cut(image) {
         const idx = this.images.indexOf(image);
@@ -134,6 +142,7 @@
               layout: {},
             });
           });
+          this.gotoPage(this.pages.length - 1);
         });
       },
     },
