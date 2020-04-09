@@ -7,6 +7,9 @@
           <PageImage class="image" v-for="image in page.images" :key="image.src" :image="image" :canAdd="!!buffer.length" @before="before(image)" @after="after(image)" @cut="cut(image)" />
         </transition-group>
       </div>
+      <div v-if="isNewPage" class="page" :style="pageStyle">
+        <div class="add" @click="after(images[images.length - 1])">Add</div>
+      </div>
     </div>
     <div class="buffer">
       <img v-for="image in buffer" :key="image.src" :src="image.src">
@@ -50,6 +53,9 @@
       },
       visiblePages() {
         return this.pages.slice(this.offset * 2, this.offset * 2 + 2);
+      },
+      isNewPage() {
+        return this.offset === (this.pages.length - this.pages.length % 2) / 2;
       },
     },
     methods: {
@@ -102,5 +108,25 @@
   .image-enter,
   .image-leave-to {
     transform: scale(0);
+  }
+  .add {
+    position: absolute;
+    left: calc(50% - 36px);
+    top: calc(50% - 36px);
+    width: 72px;
+    height: 72px;
+    line-height: 72px;
+    text-align: center;
+    text-transform: uppercase;
+    color: white;
+    background: black;
+    border-radius: 100%;
+    box-shadow: 0 2px 8px rgba(0,0,0,.2);
+    user-select: none;
+    cursor: pointer;
+    opacity: 0.4;
+  }
+  .add:hover {
+    opacity: 0.8;
   }
 </style>

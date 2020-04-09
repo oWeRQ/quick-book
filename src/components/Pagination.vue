@@ -14,7 +14,10 @@
 			pages() {
 				const pages = [];
 				for (let i = 1; i <= this.total; i += 2) {
-					pages.push(i + ' | ' + (i + 1));
+					pages.push(i + ' | ' + (i < this.total ? i + 1 : '+'));
+				}
+				if (this.total % 2 === 0) {
+					pages.push('+');
 				}
 				return pages;
 			},
