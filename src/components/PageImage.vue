@@ -1,8 +1,8 @@
 <template>
   <div class="wrap" :style="style">
     <img :src="image.src">
-    <div v-if="canAdd" class="action before" @click="$emit('before')">Add</div>
-    <div v-if="canAdd" class="action after" @click="$emit('after')">Add</div>
+    <div v-if="canAdd" class="action before" @click="$emit('before')">+</div>
+    <div v-if="canAdd" class="action after" @click="$emit('after')">+</div>
     <div class="action cut" @click="$emit('cut')">Cut</div>
   </div>
 </template>
@@ -63,13 +63,21 @@
   .before {
     left: -16px;
     top: calc(50% - 24px);
+    line-height: 44px;
+    font-size: 32px;
   }
   .after {
     right: -16px;
     top: calc(50% - 24px);
+    line-height: 44px;
+    font-size: 32px;
   }
   .cut {
-    left: calc(50% - 24px);
-    bottom: -16px;
+    left: calc(50% - 32px);
+    bottom: 0;
+    width: 64px;
+    height: 32px;
+    line-height: 32px;
+    border-radius: 8px 8px 0 0;
   }
 </style>

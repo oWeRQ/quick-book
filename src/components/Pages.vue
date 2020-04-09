@@ -8,7 +8,7 @@
         </transition-group>
       </div>
       <div v-if="isNewPage" class="page" :style="pageStyle">
-        <div class="add" @click="add()">Add</div>
+        <div class="add" @click="add()">+</div>
       </div>
     </div>
     <div class="buffer">
@@ -187,7 +187,8 @@
     top: calc(50% - 36px);
     width: 72px;
     height: 72px;
-    line-height: 72px;
+    line-height: 68px;
+    font-size: 48px;
     text-align: center;
     text-transform: uppercase;
     color: white;
