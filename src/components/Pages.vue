@@ -38,22 +38,20 @@
     });
   }
 
-  function loadImage(file) {
+  function loadImage(url) {
     return new Promise(function(resolve, reject) {
       try {
-        const reader = new FileReader()
-        reader.readAsDataURL(file)
-        reader.onloadend = () => {
-          const img = document.createElement('img')
-          img.src = reader.result;
-          img.onload = () => {
-            resolve(img);
-          };
-        };
+        const img = document.createElement('img')
+        img.src = url;
+        img.onload = () => resolve(img);
       } catch (ex) {
         reject(ex);
       }
     });
+  }
+
+  function loadFiles(files) {
+    return Promise.all([...files].map((file) => loadImage(URL.createObjectURL(file))));
   }
 
   const scale = 0.6;
@@ -116,7 +114,6 @@
         this.buffer = this.buffer.concat(this.images.splice(idx, 1));
       },
       add() {
-        console.log(this.buffer.length);
         if (this.buffer.length) {
           this.after(this.images[this.images.length - 1]);
         } else {
@@ -129,21 +126,25 @@
       },
       drop(e) {
         e.preventDefault();
+        loadImage(e.dataTransfer.getData('text')).then((img) => this.addImages([img]));
         this.addFiles(e.dataTransfer.files);
       },
       addFiles(files) {
-        Promise.all([...files].map(loadImage)).then((imgs) => {
+        loadFiles(files).then((imgs) => {
           const lastImage = this.images[this.images.length - 1];
-          imgs.forEach((img) => {
-            this.images.push({
-              src: img.src,
-              width: img.width,
-              height: img.height,
-              ratio: img.width / img.height,
-              layout: {},
-            });
-          });
+          this.addImages(imgs);
           this.goto(lastImage);
+        });
+      },
+      addImages(imgs) {
+        imgs.forEach((img) => {
+          this.images.push({
+            src: img.src,
+            width: img.width,
+            height: img.height,
+            ratio: img.width / img.height,
+            layout: {},
+          });
         });
       },
     },
