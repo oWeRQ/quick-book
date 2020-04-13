@@ -46,7 +46,12 @@ export default class PageLayout {
     }
 
     if (initScale === 1 && height > this.availHeight) {
-      this.processLayout(page, this.availHeight / height);
+      return this.processLayout(page, this.availHeight / height);
+    }
+
+    if (height < this.availHeight) {
+      const top = (this.availHeight - height) / 2;
+      page.images.forEach((image) => image.layout.top += top);
     }
   }
 
