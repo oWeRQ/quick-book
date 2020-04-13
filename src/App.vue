@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <Pages :images="images" />
+    <Pages :buffer="images" />
   </div>
 </template>
 

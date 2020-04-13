@@ -12,7 +12,7 @@
       </div>
     </div>
     <div class="buffer">
-      <img v-for="image in buffer" :key="image.src" :src="image.src">
+      <img v-for="image in buffer" :key="image.src" :src="image.src" @click="add(image)">
     </div>
   </div>
 </template>
@@ -66,11 +66,11 @@
   });
 
   export default {
-    props: ['images'],
+    props: ['buffer'],
     data() {
       return {
         offset: 0,
-        buffer: [],
+        images: [],
       };
     },
     computed: {
@@ -113,8 +113,12 @@
         const idx = this.images.indexOf(image);
         this.buffer = this.buffer.concat(this.images.splice(idx, 1));
       },
-      add() {
-        if (this.buffer.length) {
+      add(image) {
+        if (image) {
+          const idx = this.buffer.indexOf(image);
+          this.buffer.splice(idx, 1);
+          this.images.push(image);
+        } else if (this.buffer.length) {
           this.after(this.images[this.images.length - 1]);
         } else {
           selectFile(true).then(this.addFiles);
@@ -183,6 +187,11 @@
   .buffer > * {
     margin: 4px;
     height: 120px;
+    opacity: .8;
+    cursor: pointer;
+  }
+  .buffer > :hover {
+    opacity: 1;
   }
   .image {
     transform: scale(1);
