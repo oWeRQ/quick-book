@@ -18,10 +18,10 @@ export default class PageLayout {
   }
 
   process(images, perPage = 6) {
-    var pages = [];
+    const pages = [];
 
-    for (var i = 0; i < images.length; i += perPage) {
-      var page = {
+    for (let i = 0; i < images.length; i += perPage) {
+      const page = {
         images: images.slice(i, i + perPage),
       };
       this.processPage(page);
@@ -33,16 +33,40 @@ export default class PageLayout {
 
   processPage(page) {
     page.sumRatio = page.images.reduce((acc, cur) => acc + cur.ratio, 0);
-    page.rowsCount = Math.round(page.sumRatio / Math.sqrt(page.sumRatio * this.availRatio));
 
+    this.processRows(page);
     this.processLayout(page);
   }
 
+  processRows(page) {
+    page.rows = [];
+
+    const rowRatio = Math.sqrt(page.sumRatio * this.availRatio);
+    let sumRatio = 0;
+    let row = [];
+
+    for (let image of page.images) {
+      const delta = rowRatio - sumRatio;
+
+      if (delta - image.ratio < -0.2) {
+        sumRatio = -delta;
+        page.rows.push(row);
+        row = [];
+      }
+
+      sumRatio += image.ratio;
+      row.push(image);
+    }
+
+    if (row.length > 0) {
+      page.rows.push(row);
+    }
+  }
+
   processLayout(page, initScale = 1) {
-    var perRow = Math.ceil(page.images.length / page.rowsCount);
-    var height = 0;
-    for (var i = 0; i < page.images.length; i += perRow) {
-      height += this.processRow(page.images.slice(i, i + perRow), this.paddings.left, this.paddings.top + height, initScale).height;
+    let height = 0;
+    for (let row of page.rows) {
+      height += this.processRowLayout(row, this.paddings.left, this.paddings.top + height, initScale).height;
     }
 
     if (initScale === 1 && height > this.availHeight) {
@@ -55,14 +79,14 @@ export default class PageLayout {
     }
   }
 
-  processRow(images, left = 0, top = 0, initScale = 1) {
-    var sumRatio = images.reduce((acc, cur) => acc + cur.ratio, 0);
-    var rowWidth = this.availWidth * initScale;
-    var height = (rowWidth - this.spacer * images.length) / sumRatio;
+  processRowLayout(images, left = 0, top = 0, initScale = 1) {
+    const sumRatio = images.reduce((acc, cur) => acc + cur.ratio, 0);
+    const rowWidth = this.availWidth * initScale;
+    const height = (rowWidth - this.spacer * images.length) / sumRatio;
     
     left += (this.availWidth - rowWidth) / 2;
     images.forEach((image) => {
-      var width = height * image.ratio;
+      const width = height * image.ratio;
       image.layout = {left, top, width, height};
 
       left += width + this.spacer;

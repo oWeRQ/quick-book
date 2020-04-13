@@ -81,7 +81,7 @@
         };
       },
       pages() {
-        return layout.process(this.images, 6);
+        return layout.process(this.images);
       },
       visiblePages() {
         return this.pages.slice(this.offset * 2, this.offset * 2 + 2);
