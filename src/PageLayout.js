@@ -24,58 +24,58 @@ export default class PageLayout {
       const page = {
         images: images.slice(i, i + perPage),
       };
-      this.processPage(page);
+      const rows = this.pageRows(page.images);
+      this.processLayout(rows);
       pages.push(page);
     }
 
     return pages;
   }
 
-  processPage(page) {
-    page.sumRatio = page.images.reduce((acc, cur) => acc + cur.ratio, 0);
+  pageRows(images) {
+    const rows = [];
 
-    this.processRows(page);
-    this.processLayout(page);
-  }
-
-  processRows(page) {
-    page.rows = [];
-
-    const rowRatio = Math.sqrt(page.sumRatio * this.availRatio);
-    let sumRatio = 0;
+    const sumRatio = images.reduce((acc, cur) => acc + cur.ratio, 0);
+    const rowsCount = Math.round(sumRatio / Math.sqrt(sumRatio * this.availRatio));
+    const rowRatioAvg = sumRatio / rowsCount;
+    let rowRatio = 0;
     let row = [];
 
-    for (let image of page.images) {
-      const delta = rowRatio - sumRatio;
+    for (let image of images) {
+      const availRatio = rowRatioAvg - rowRatio;
 
-      if (delta - image.ratio < -0.2) {
-        sumRatio = -delta;
-        page.rows.push(row);
+      if (availRatio - image.ratio < -0.2 && row.length) {
+        rowRatio = -availRatio;
+        rows.push(row);
         row = [];
       }
 
-      sumRatio += image.ratio;
+      rowRatio += image.ratio;
       row.push(image);
     }
 
     if (row.length > 0) {
-      page.rows.push(row);
+      rows.push(row);
     }
+
+    return rows;
   }
 
-  processLayout(page, initScale = 1) {
+  processLayout(rows, initScale = 1) {
     let height = 0;
-    for (let row of page.rows) {
+    for (let row of rows) {
       height += this.processRowLayout(row, this.paddings.left, this.paddings.top + height, initScale).height;
     }
 
     if (initScale === 1 && height > this.availHeight) {
-      return this.processLayout(page, this.availHeight / height);
+      return this.processLayout(rows, this.availHeight / height);
     }
 
     if (height < this.availHeight) {
       const top = (this.availHeight - height) / 2;
-      page.images.forEach((image) => image.layout.top += top);
+      for (let row of rows) {
+        row.forEach((image) => image.layout.top += top);
+      }
     }
   }
 
