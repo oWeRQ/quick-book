@@ -6,7 +6,7 @@
         <transition-group name="image">
           <PageImage class="image" v-for="image in page.images" :key="image.src" :image="image" :canAdd="!!buffer.length" @before="before(image)" @after="after(image)" @cut="cut(image)" />
         </transition-group>
-        <div class="rate">{{ page.rate }}</div>
+        <div class="rate">{{ page.rate.toFixed(2) }}</div>
       </div>
       <div v-if="isNewPage" class="page" :style="pageStyle">
         <div class="add" @click="add()">+</div>
@@ -91,6 +91,7 @@
     },
     methods: {
       gotoPage(page) {
+        page = Math.max(0, Math.min(page, this.pages.length - 1));
         this.offset = Math.floor(page / 2);
       },
       goto(image) {
@@ -111,6 +112,7 @@
       cut(image) {
         const idx = this.images.indexOf(image);
         this.buffer = this.buffer.concat(this.images.splice(idx, 1));
+        this.goto(this.images[idx - 1]);
       },
       add(image) {
         if (image) {

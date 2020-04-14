@@ -24,22 +24,32 @@ export default class PageLayout {
       const variations = [];
 
       for (let count = min; count <= max; count++) {
-        const page = {
-          images: images.slice(i, i + count),
-        };
-        page.rows = this.pageRows(page.images);
-        this.processLayout(page.rows);
-        page.rate = this.rateLayout(page.images);
+        const rate = this.rateLayout(images.slice(i, i + count));
 
-        variations.push(page);
+        for (let next = min; next <= max; next++) {
+          const nextImages = images.slice(i + count, i + count + next);
+
+          variations.push({
+            count,
+            next,
+            rate: rate + (nextImages.length === 0 ? 1 : this.rateLayout(nextImages) + (nextImages.length < min ? -1 : 0)),
+          });
+
+          if (nextImages.length === 0)
+            break;
+        }
       }
 
       variations.sort((a, b) => b.rate - a.rate);
-      console.log(variations);
-      
-      this.processLayout(variations[0].rows);
-      pages.push(variations[0]);
-      i += variations[0].images.length;
+
+      const page = {
+        images: images.slice(i, i + variations[0].count),
+        rate: variations[0].rate,
+      };
+
+      this.processLayout(this.pageRows(page.images));
+      pages.push(page);
+      i += page.images.length;
     }
 
     return pages;
@@ -112,10 +122,12 @@ export default class PageLayout {
   }
 
   rateLayout(images) {
+    this.processLayout(this.pageRows(images));
+
     const sizes = images.map((image) => Math.min(image.layout.width, image.layout.height));
     const minSize = Math.min(...sizes);
     const maxSize = Math.max(...sizes);
 
-    return (minSize / maxSize).toFixed(2);
+    return minSize / maxSize;
   }
 }
