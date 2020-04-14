@@ -17,16 +17,29 @@ export default class PageLayout {
     this.availRatio = this.availWidth / this.availHeight;
   }
 
-  process(images, perPage = 6) {
+  process(images, min = 3, max = 6) {
     const pages = [];
 
-    for (let i = 0; i < images.length; i += perPage) {
-      const page = {
-        images: images.slice(i, i + perPage),
-      };
-      const rows = this.pageRows(page.images);
-      this.processLayout(rows);
-      pages.push(page);
+    for (let i = 0; i < images.length;) {
+      const variations = [];
+
+      for (let count = min; count <= max; count++) {
+        const page = {
+          images: images.slice(i, i + count),
+        };
+        page.rows = this.pageRows(page.images);
+        this.processLayout(page.rows);
+        page.rate = this.rateLayout(page.images);
+
+        variations.push(page);
+      }
+
+      variations.sort((a, b) => b.rate - a.rate);
+      console.log(variations);
+      
+      this.processLayout(variations[0].rows);
+      pages.push(variations[0]);
+      i += variations[0].images.length;
     }
 
     return pages;
@@ -96,5 +109,13 @@ export default class PageLayout {
       width: rowWidth,
       height: height + this.spacer
     };
+  }
+
+  rateLayout(images) {
+    const sizes = images.map((image) => Math.max(image.layout.width, image.layout.height));
+    const minSize = Math.min(...sizes);
+    const maxSize = Math.max(...sizes);
+
+    return (minSize / maxSize).toFixed(2);
   }
 }

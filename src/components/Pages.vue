@@ -6,6 +6,7 @@
         <transition-group name="image">
           <PageImage class="image" v-for="image in page.images" :key="image.src" :image="image" :canAdd="!!buffer.length" @before="before(image)" @after="after(image)" @cut="cut(image)" />
         </transition-group>
+        <div class="rate">{{ page.rate }}</div>
       </div>
       <div v-if="isNewPage" class="page" :style="pageStyle">
         <div class="add" @click="add()">+</div>
@@ -220,5 +221,14 @@
   }
   .add:hover {
     opacity: 0.8;
+  }
+  .rate {
+    position: absolute;
+    left: 0;
+    top: 2px;
+    right: 0;
+    font-size: 13px;
+    text-align: center;
+    color: gray;
   }
 </style>
