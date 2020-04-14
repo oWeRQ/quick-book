@@ -38,7 +38,7 @@
           ...image,
           ratio: image.width / image.height,
           layout: {},
-        })),
+        })).sort(() => Math.random() - 0.5),
       };
     },
     components: {

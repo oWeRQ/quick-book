@@ -25,12 +25,10 @@
   function selectFile(multiple) {
     return new Promise(function(resolve, reject) {
       try {
-        var input = document.createElement('input');
+        const input = document.createElement('input');
         input.type = 'file';
         input.multiple = multiple || false;
-        input.onchange = function(e) {
-          resolve(e.target.files || []);
-        }
+        input.onchange = (e)  => resolve(e.target.files || []);
         input.click();
       } catch (ex) {
         reject(ex);
