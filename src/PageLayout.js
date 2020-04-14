@@ -112,7 +112,7 @@ export default class PageLayout {
   }
 
   rateLayout(images) {
-    const sizes = images.map((image) => Math.max(image.layout.width, image.layout.height));
+    const sizes = images.map((image) => Math.min(image.layout.width, image.layout.height));
     const minSize = Math.min(...sizes);
     const maxSize = Math.max(...sizes);
 
