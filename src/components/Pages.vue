@@ -116,6 +116,7 @@
           const idx = this.buffer.indexOf(image);
           this.buffer.splice(idx, 1);
           this.images.push(image);
+          this.goto(image);
         } else if (this.buffer.length) {
           this.after(this.images[this.images.length - 1]);
         } else {
