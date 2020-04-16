@@ -12,6 +12,12 @@
         <div class="add" @click="add()">+</div>
       </div>
     </div>
+    <div class="count">
+      Per page:
+      <input type="number" :min="1" :max="max" v-model="min">
+      &ndash;
+      <input type="number" :min="min" :max="100" v-model="max">
+    </div>
     <div class="buffer">
       <img v-for="image in buffer" :key="image.src" :src="image.src" @click="add(image)">
     </div>
@@ -68,6 +74,8 @@
     props: ['buffer'],
     data() {
       return {
+        min: 3,
+        max: 6,
         offset: 0,
         images: [],
       };
@@ -80,7 +88,7 @@
         };
       },
       pages() {
-        return layout.process(this.images);
+        return layout.process(this.images, +this.min, +this.max);
       },
       visiblePages() {
         return this.pages.slice(this.offset * 2, this.offset * 2 + 2);
@@ -184,7 +192,7 @@
     overflow-x: scroll;
     display: flex;
     justify-content: center;
-    margin: 32px auto;
+    margin: 16px auto;
   }
   .buffer > * {
     margin: 4px;
@@ -232,5 +240,12 @@
     font-size: 13px;
     text-align: center;
     color: gray;
+  }
+  .count {
+    margin: 16px auto;
+    text-align: center;
+  }
+  .count input {
+    width: 32px;
   }
 </style>
