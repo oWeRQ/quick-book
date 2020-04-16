@@ -19,8 +19,9 @@ export default class PageLayout {
 
   process(images, min = 3, max = 6) {
     const pages = [];
+    let pageCount;
 
-    for (let i = 0; i < images.length;) {
+    for (let i = 0; i < images.length; i += pageCount) {
       const variations = [];
 
       for (let count = min; count <= max; count++) {
@@ -28,11 +29,12 @@ export default class PageLayout {
 
         for (let next = min; next <= max; next++) {
           const nextImages = images.slice(i + count, i + count + next);
+          const nextRate = (nextImages.length === 0 ? 1 : this.rateLayout(nextImages) + (nextImages.length < min ? -1 : 0));
 
           variations.push({
             count,
             next,
-            rate: rate + (nextImages.length === 0 ? 1 : this.rateLayout(nextImages) + (nextImages.length < min ? -1 : 0)),
+            rate: rate + nextRate,
           });
 
           if (nextImages.length === 0)
@@ -42,15 +44,11 @@ export default class PageLayout {
 
       variations.sort((a, b) => b.rate - a.rate);
 
-      const page = {
-        images: images.slice(i, i + variations[0].count),
+      pageCount = variations[0].count;
+      pages.push({
+        items: this.createLayout(this.pageRows(images.slice(i, i + pageCount))),
         rate: variations[0].rate,
-      };
-
-      page.items = this.createLayout(this.pageRows(page.images));
-
-      pages.push(page);
-      i += page.images.length;
+      });
     }
 
     return pages;

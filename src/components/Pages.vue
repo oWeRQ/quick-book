@@ -95,7 +95,7 @@
         this.offset = Math.floor(page / 2);
       },
       goto(image) {
-        this.gotoPage(this.pages.findIndex((page) => page.images.includes(image)));
+        this.gotoPage(this.pages.findIndex((page) => page.items.some((item) => item.image === image)));
       },
       before(image) {
         const idx = this.images.indexOf(image);
