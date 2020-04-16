@@ -37,7 +37,6 @@
         ].map((image) => ({
           ...image,
           ratio: image.width / image.height,
-          layout: {},
         })).sort(() => Math.random() - 0.5),
       };
     },

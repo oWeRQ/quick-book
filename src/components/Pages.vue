@@ -4,9 +4,9 @@
     <div class="book" @dragover="dragover($event)" @drop="drop($event)">
       <div v-for="(page, index) in visiblePages" :key="index" class="page" :style="pageStyle">
         <transition-group name="image">
-          <PageImage class="image" v-for="image in page.images" :key="image.src" :image="image" :canAdd="!!buffer.length" @before="before(image)" @after="after(image)" @cut="cut(image)" />
+          <PageImage class="image" v-for="item in page.items" :key="item.image.src" :item="item" :canAdd="!!buffer.length" @before="before(item.image)" @after="after(item.image)" @cut="cut(item.image)" />
         </transition-group>
-        <div class="rate">{{ page.rate.toFixed(2) }}</div>
+        <div class="rate">Rate: {{ page.rate.toFixed(2) }}</div>
       </div>
       <div v-if="isNewPage" class="page" :style="pageStyle">
         <div class="add" @click="add()">+</div>

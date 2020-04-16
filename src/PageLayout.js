@@ -47,7 +47,8 @@ export default class PageLayout {
         rate: variations[0].rate,
       };
 
-      this.processLayout(this.pageRows(page.images));
+      page.items = this.createLayout(this.pageRows(page.images));
+
       pages.push(page);
       i += page.images.length;
     }
@@ -84,25 +85,29 @@ export default class PageLayout {
     return rows;
   }
 
-  processLayout(rows, initScale = 1) {
+  createLayout(rows, initScale = 1) {
+    let layout = [];
     let height = 0;
     for (let row of rows) {
-      height += this.processRowLayout(row, this.paddings.left, this.paddings.top + height, initScale).height;
+      let rowLayout = this.createRowLayout(row, this.paddings.left, this.paddings.top + height, initScale);
+      layout = layout.concat(...rowLayout.items);
+      height += rowLayout.height;
     }
 
     if (initScale === 1 && height > this.availHeight) {
-      return this.processLayout(rows, this.availHeight / height);
+      return this.createLayout(rows, this.availHeight / height);
     }
 
     if (height < this.availHeight) {
       const top = (this.availHeight - height) / 2;
-      for (let row of rows) {
-        row.forEach((image) => image.layout.top += top);
-      }
+      layout.forEach((item) => item.top += top);
     }
+
+    return layout;
   }
 
-  processRowLayout(images, left = 0, top = 0, initScale = 1) {
+  createRowLayout(images, left = 0, top = 0, initScale = 1) {
+    const items = [];
     const sumRatio = images.reduce((acc, cur) => acc + cur.ratio, 0);
     const rowWidth = this.availWidth * initScale;
     const height = (rowWidth - this.spacer * images.length) / sumRatio;
@@ -110,21 +115,22 @@ export default class PageLayout {
     left += (this.availWidth - rowWidth) / 2;
     images.forEach((image) => {
       const width = height * image.ratio;
-      image.layout = {left, top, width, height};
+      items.push({image, left, top, width, height});
 
       left += width + this.spacer;
     });
 
     return {
+      items,
       width: rowWidth,
       height: height + this.spacer
     };
   }
 
   rateLayout(images) {
-    this.processLayout(this.pageRows(images));
+    const layout = this.createLayout(this.pageRows(images));
 
-    const sizes = images.map((image) => Math.min(image.layout.width, image.layout.height));
+    const sizes = layout.map((item) => Math.min(item.width, item.height));
     const minSize = Math.min(...sizes);
     const maxSize = Math.max(...sizes);
 

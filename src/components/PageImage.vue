@@ -1,6 +1,6 @@
 <template>
   <div class="wrap" :style="style">
-    <img :src="image.src">
+    <img :src="item.image.src">
     <div v-if="canAdd" class="action before" @click="$emit('before')">+</div>
     <div v-if="canAdd" class="action after" @click="$emit('after')">+</div>
     <div class="action cut" @click="$emit('cut')">Cut</div>
@@ -9,14 +9,14 @@
 
 <script>
   export default {
-    props: ['image', 'canAdd'],
+    props: ['item', 'canAdd'],
     computed: {
       style() {
         return {
-          left: this.image.layout.left + 'mm',
-          top: this.image.layout.top + 'mm',
-          width: this.image.layout.width + 'mm',
-          height: this.image.layout.height + 'mm',
+          left: this.item.left + 'mm',
+          top: this.item.top + 'mm',
+          width: this.item.width + 'mm',
+          height: this.item.height + 'mm',
         };
       }
     },
