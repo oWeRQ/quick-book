@@ -1,6 +1,6 @@
 <template>
   <div class="pages">
-    <Pagination :total="pages.length" v-model="offset" />
+    <Pagination :total="pages.length" :near="2" v-model="offset" />
     <div class="book" @dragover="dragover($event)" @drop="drop($event)">
       <div v-for="(page, index) in visiblePages" :key="index" class="page" :style="pageStyle">
         <transition-group name="image">
@@ -91,16 +91,16 @@
         return layout.process(this.images, +this.min, +this.max);
       },
       visiblePages() {
-        return this.pages.slice(this.offset * 2, this.offset * 2 + 2);
+        return this.pages.slice(this.offset, this.offset + 2);
       },
       isNewPage() {
-        return this.offset === (this.pages.length - this.pages.length % 2) / 2;
+        return this.offset === (this.pages.length - this.pages.length % 2);
       },
     },
     methods: {
       gotoPage(page) {
         page = Math.max(0, Math.min(page, this.pages.length - 1));
-        this.offset = Math.floor(page / 2);
+        this.offset = page - page % 2;
       },
       goto(image) {
         this.gotoPage(this.pages.findIndex((page) => page.items.some((item) => item.image === image)));

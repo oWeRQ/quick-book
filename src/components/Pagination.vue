@@ -1,8 +1,8 @@
 <template>
 	<nav>
-		<span v-for="(page, i) in pages" :key="i" :class="{item: true, active: i === value}" @click="$emit('input', i)">
-			<span class="left">{{ page[0] }}</span>
-			<span class="right" v-if="page[1]">{{ page[1] }}</span>
+		<span v-for="(page, i) in pages" :key="i" :class="{item: page.value > -1, active: page.value === value}" @click="page.value > -1 && $emit('input', page.value)">
+			<span class="left">{{ page.left }}</span>
+			<span class="right" v-if="page.right">{{ page.right }}</span>
 		</span>
 	</nav>
 </template>
@@ -12,16 +12,42 @@
 		props: [
 			'total',
 			'value',
+			'near',
 		],
 		computed: {
 			pages() {
 				const pages = [];
-				for (let i = 1; i <= this.total; i += 2) {
-					pages.push([i, (i < this.total ? i + 1 : '+')]);
+				const last = this.total + this.total % 2 - 2;
+
+				for (let i = 0; i <= last; i += 2) {
+					if (i === 2 && this.value - this.near > 2) {
+						pages.push({
+							left: '...',
+						});
+					}
+
+					if (i === 0 || i === last || (i >= this.value - this.near && i <= this.value + this.near + 1)) {
+						pages.push({
+							value: i,
+							left: i + 1,
+							right: (i < this.total - 1 ? i + 2 : '+'),
+						});
+					}
+
+					if (i === last - 2 && this.value + this.near < last - 2) {
+						pages.push({
+							left: '...',
+						});
+					}
 				}
+
 				if (this.total % 2 === 0) {
-					pages.push(['+']);
+					pages.push({
+						value: this.total,
+						left: '+',
+					});
 				}
+
 				return pages;
 			},
 		},
