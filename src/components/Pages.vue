@@ -18,9 +18,7 @@
       &ndash;
       <input type="number" :min="min" :max="100" v-model="max">
     </div>
-    <div class="buffer">
-      <img v-for="image in buffer" :key="image.src" :src="image.src" @click="add(image)">
-    </div>
+    <ImagesBuffer v-model="buffer" @add="addImages($event)"></ImagesBuffer>
   </div>
 </template>
 
@@ -28,36 +26,9 @@
   import PageLayout from '../PageLayout';
   import PageImage from './PageImage';
   import Pagination from './Pagination';
+  import ImagesBuffer from './ImagesBuffer';
 
-  function selectFile(multiple) {
-    return new Promise(function(resolve, reject) {
-      try {
-        const input = document.createElement('input');
-        input.type = 'file';
-        input.multiple = multiple || false;
-        input.onchange = (e)  => resolve(e.target.files || []);
-        input.click();
-      } catch (ex) {
-        reject(ex);
-      }
-    });
-  }
-
-  function loadImage(url) {
-    return new Promise(function(resolve, reject) {
-      try {
-        const img = document.createElement('img')
-        img.src = url;
-        img.onload = () => resolve(img);
-      } catch (ex) {
-        reject(ex);
-      }
-    });
-  }
-
-  function loadFiles(files) {
-    return Promise.all([...files].map((file) => loadImage(URL.createObjectURL(file))));
-  }
+  import { selectFile, loadImage, loadFiles } from '../functions';
 
   const scale = 0.6;
   const width = 210 * scale;
@@ -71,13 +42,13 @@
   });
 
   export default {
-    props: ['buffer'],
     data() {
       return {
         min: 3,
         max: 6,
         offset: 0,
         images: [],
+        buffer: [],
       };
     },
     computed: {
@@ -163,6 +134,7 @@
       },
     },
     components: {
+      ImagesBuffer,
       PageImage,
       Pagination,
     }
@@ -187,21 +159,6 @@
     position: relative;
     background: white;
     box-shadow: 0 2px 8px rgba(0,0,0,.2);
-  }
-  .buffer {
-    overflow-x: scroll;
-    display: flex;
-    justify-content: center;
-    margin: 16px auto;
-  }
-  .buffer > * {
-    margin: 4px;
-    height: 120px;
-    opacity: .8;
-    cursor: pointer;
-  }
-  .buffer > :hover {
-    opacity: 1;
   }
   .image {
     transform: scale(1);
