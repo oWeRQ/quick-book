@@ -8,7 +8,7 @@
         </transition-group>
         <div class="rate">Rate: {{ page.rate.toFixed(2) }}</div>
       </div>
-      <div v-if="isNewPage" class="page" :style="pageStyle">
+      <div v-if="hasNewPage" class="page" :style="pageStyle">
         <div class="add" @click="add()">+</div>
       </div>
     </div>
@@ -23,8 +23,7 @@
 </template>
 
 <script>
-  import { mapState,/* , mapMutations */ 
-  mapMutations} from 'vuex'
+  import { mapState, mapMutations, mapGetters } from 'vuex'
 
   import PageLayout from '../PageLayout';
   import PageImage from './PageImage';
@@ -56,9 +55,9 @@
       ...mapState({
         images: 'images',
       }),
-      hasSelected() {
-        return !!this.$store.state.bufferSelected.length;
-      },
+      ...mapGetters({
+        hasSelected: 'hasBufferSelected',
+      }),
       pageStyle() {
         return {
           width: width + 'mm',
@@ -71,7 +70,7 @@
       visiblePages() {
         return this.pages.slice(this.offset, this.offset + 2);
       },
-      isNewPage() {
+      hasNewPage() {
         return this.offset === (this.pages.length - this.pages.length % 2);
       },
     },

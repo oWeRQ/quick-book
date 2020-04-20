@@ -11,6 +11,11 @@ export default new Vuex.Store({
     bufferImages: images,
     bufferSelected: images,
   },
+  getters: {
+    hasBufferSelected(state) {
+      return !!state.bufferSelected.length;
+    },
+  },
   mutations: {
     bufferSelect(state, image) {
       if (state.bufferSelected.includes(image)) {
