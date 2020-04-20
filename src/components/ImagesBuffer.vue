@@ -3,59 +3,31 @@
     <div class="panel">
       <div class="actions">
         <button @click="selectAll">Select All</button>
-        <button @click="add">Add Selected</button>
+        <button @click="append">Add Selected</button>
         <button @click="remove">Remove Selected</button>
       </div>
       <div class="list">
-        <img v-for="image in images" :key="image.src" :src="image.src" @click="select(image)" :class="{image: true, selected: value.includes(image)}">
+        <img v-for="image in images" :key="image.src" :src="image.src" @click="select(image)" :class="{image: true, selected: selected.includes(image)}">
       </div>
     </div>
   </div>
 </template>
 
 <script>
-  import { images } from '../demo';
+  import { mapState, mapMutations } from 'vuex'
 
   export default {
-    props: {
-      value: Array,
-    },
-    data() {
-      return {
-        images,
-      };
-    },
-    watch: {
-      value(newValue, oldValue) {
-        const added = newValue.filter((im) => !this.images.includes(im));
-        const removed = oldValue.filter((im) => !newValue.includes(im));
-
-        this.images = this.images.filter((im) => !removed.includes(im)).concat(added);
-      },
-    },
+    computed: mapState({
+      images: 'bufferImages',
+      selected: 'bufferSelected',
+    }),
     methods: {
-      selectAll() {
-        if (this.images.length === this.value.length) {
-          this.$emit('input', []);
-        } else {
-          this.$emit('input', [...this.images]);
-        }
-      },
-      select(image) {
-        if (this.value.includes(image)) {
-          this.$emit('input', this.value.filter((im) => im !== image));
-        } else {
-          this.$emit('input', this.value.concat([image]));
-        }
-      },
-      add() {
-        this.images = this.images.filter((im) => !this.value.includes(im));
-        this.$emit('add', this.value);
-        this.$emit('input', []);
-      },
-      remove() {
-        this.images = this.images.filter((im) => !this.value.includes(im));
-      },
+      ...mapMutations({
+        select: 'bufferSelect',
+        selectAll: 'bufferSelectAll',
+        remove: 'bufferRemove',
+        append: 'append',
+      }),
     },
   }
 </script>

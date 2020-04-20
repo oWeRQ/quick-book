@@ -4,7 +4,7 @@
     <div class="book" @dragover="dragover($event)" @drop="drop($event)">
       <div v-for="(page, index) in visiblePages" :key="index" class="page" :style="pageStyle">
         <transition-group name="image">
-          <PageImage class="image" v-for="item in page.items" :key="item.image.src" :item="item" :canAdd="!!buffer.length" @before="before(item.image)" @after="after(item.image)" @cut="cut(item.image)" />
+          <PageImage class="image" v-for="item in page.items" :key="item.image.src" :item="item" :canAdd="hasSelected" @before="before(item.image)" @after="after(item.image)" @cut="cut(item.image)" />
         </transition-group>
         <div class="rate">Rate: {{ page.rate.toFixed(2) }}</div>
       </div>
@@ -18,11 +18,14 @@
       &ndash;
       <input type="number" :min="min" :max="100" v-model="max">
     </div>
-    <ImagesBuffer v-model="buffer" @add="addImages($event)"></ImagesBuffer>
+    <ImagesBuffer />
   </div>
 </template>
 
 <script>
+  import { mapState,/* , mapMutations */ 
+  mapMutations} from 'vuex'
+
   import PageLayout from '../PageLayout';
   import PageImage from './PageImage';
   import Pagination from './Pagination';
@@ -47,11 +50,15 @@
         min: 3,
         max: 6,
         offset: 0,
-        images: [],
-        buffer: [],
       };
     },
     computed: {
+      ...mapState({
+        images: 'images',
+      }),
+      hasSelected() {
+        return !!this.$store.state.bufferSelected.length;
+      },
       pageStyle() {
         return {
           width: width + 'mm',
@@ -69,38 +76,40 @@
       },
     },
     methods: {
+      ...mapMutations({
+        append: 'append',
+        insert: 'insert',
+        cutIndex: 'cutIndex',
+        addImages: 'addImages',
+      }),
       gotoPage(page) {
         page = Math.max(0, Math.min(page, this.pages.length - 1));
         this.offset = page - page % 2;
+      },
+      gotoLast() {
+        this.goto(this.images[this.images.length - 1]);
       },
       goto(image) {
         this.gotoPage(this.pages.findIndex((page) => page.items.some((item) => item.image === image)));
       },
       before(image) {
         const idx = this.images.indexOf(image);
-        this.images.splice(idx, 0, ...this.buffer);
-        this.buffer = [];
+        this.insert(idx);
         this.goto(this.images[idx]);
       },
       after(image) {
         const idx = this.images.indexOf(image);
-        this.images.splice(idx + 1, 0, ...this.buffer);
-        this.buffer = [];
+        this.insert(idx + 1);
         this.goto(this.images[idx + 1]);
       },
       cut(image) {
         const idx = this.images.indexOf(image);
-        this.buffer = this.buffer.concat(this.images.splice(idx, 1));
+        this.cutIndex(idx);
         this.goto(this.images[idx - 1]);
       },
-      add(image) {
-        if (image) {
-          const idx = this.buffer.indexOf(image);
-          this.buffer.splice(idx, 1);
-          this.images.push(image);
-          this.goto(image);
-        } else if (this.buffer.length) {
-          this.after(this.images[this.images.length - 1]);
+      add() {
+        if (this.hasSelected) {
+          this.append();
         } else {
           selectFile(true).then(this.addFiles);
         }
@@ -119,17 +128,6 @@
           const lastImage = this.images[this.images.length - 1];
           this.addImages(imgs);
           this.goto(lastImage);
-        });
-      },
-      addImages(imgs) {
-        imgs.forEach((img) => {
-          this.images.push({
-            src: img.src,
-            width: img.width,
-            height: img.height,
-            ratio: img.width / img.height,
-            layout: {},
-          });
         });
       },
     },
