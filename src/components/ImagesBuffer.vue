@@ -1,12 +1,14 @@
 <template>
   <div class="buffer" v-if="images.length">
-    <div class="actions">
-      <button @click="selectAll">Select All</button>
-      <button @click="add">Add Selected</button>
-      <button @click="remove">Remove Selected</button>
-    </div>
-    <div class="list">
-      <img v-for="image in images" :key="image.src" :src="image.src" @click="select(image)" :class="{image: true, selected: value.includes(image)}">
+    <div class="panel">
+      <div class="actions">
+        <button @click="selectAll">Select All</button>
+        <button @click="add">Add Selected</button>
+        <button @click="remove">Remove Selected</button>
+      </div>
+      <div class="list">
+        <img v-for="image in images" :key="image.src" :src="image.src" @click="select(image)" :class="{image: true, selected: value.includes(image)}">
+      </div>
     </div>
   </div>
 </template>
@@ -82,8 +84,11 @@
   }
 </script>
 
-<style>
+<style scoped>
   .buffer {
+    margin-top: 220px;
+  }
+  .panel {
     position: fixed;
     left: 0;
     right: 0;
@@ -94,6 +99,7 @@
   }
   .actions {
     display: flex;
+    margin-bottom: 4px;
     border-bottom: 1px solid #ccc;
   }
   .actions button {

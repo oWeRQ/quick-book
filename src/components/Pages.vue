@@ -142,9 +142,6 @@
 </script>
 
 <style scoped>
-  .pages {
-    margin-bottom: 220px;
-  }
   .book {
     display: flex;
     justify-content: center;
