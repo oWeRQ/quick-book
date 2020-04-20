@@ -15,6 +15,9 @@ export default new Vuex.Store({
     hasBufferSelected(state) {
       return !!state.bufferSelected.length;
     },
+    isBufferSelectedAll(state) {
+      return (state.bufferImages.length === state.bufferSelected.length);
+    },
   },
   mutations: {
     bufferSelect(state, image) {
@@ -36,11 +39,13 @@ export default new Vuex.Store({
       state.bufferSelected = [];
     },
     append(state) {
-      state.images = state.images.concat(state.bufferSelected);
+      const selected = state.bufferImages.filter((im) => state.bufferSelected.includes(im));
+      state.images = state.images.concat(selected);
       this.commit('bufferRemove');
     },
     insert(state, idx) {
-      state.images.splice(idx, 0, ...state.bufferSelected);
+      const selected = state.bufferImages.filter((im) => state.bufferSelected.includes(im));
+      state.images.splice(idx, 0, ...selected);
       this.commit('bufferRemove');
     },
     cutIndex(state, idx) {
