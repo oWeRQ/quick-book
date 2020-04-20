@@ -61,13 +61,13 @@
   }
 
   .before {
-    left: -16px;
+    left: -8px;
     top: calc(50% - 24px);
     line-height: 44px;
     font-size: 32px;
   }
   .after {
-    right: -16px;
+    right: -8px;
     top: calc(50% - 24px);
     line-height: 44px;
     font-size: 32px;
@@ -78,6 +78,6 @@
     width: 64px;
     height: 32px;
     line-height: 32px;
-    border-radius: 8px 8px 0 0;
+    border-radius: 2px;
   }
 </style>
