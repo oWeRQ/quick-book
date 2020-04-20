@@ -3,6 +3,7 @@
     <div class="actions">
       <button @click="selectAll">Select All</button>
       <button @click="add">Add Selected</button>
+      <button @click="remove">Remove Selected</button>
     </div>
     <div class="list">
       <img v-for="image in images" :key="image.src" :src="image.src" @click="select(image)" :class="{image: true, selected: value.includes(image)}">
@@ -46,6 +47,14 @@
         })).sort(() => Math.random() - 0.5),
       };
     },
+    watch: {
+      value(newValue, oldValue) {
+        const added = newValue.filter((im) => !this.images.includes(im));
+        const removed = oldValue.filter((im) => !newValue.includes(im));
+
+        this.images = this.images.filter((im) => !removed.includes(im)).concat(added);
+      },
+    },
     methods: {
       selectAll() {
         if (this.images.length === this.value.length) {
@@ -64,6 +73,10 @@
       add() {
         this.images = this.images.filter((im) => !this.value.includes(im));
         this.$emit('add', this.value);
+        this.$emit('input', []);
+      },
+      remove() {
+        this.images = this.images.filter((im) => !this.value.includes(im));
       },
     },
   }
@@ -80,17 +93,16 @@
     box-shadow: 0 0 8px rgba(0, 0, 0, .2);
   }
   .actions {
-    padding: 8px;
+    display: flex;
     border-bottom: 1px solid #ccc;
   }
   .actions button {
-    margin-right: 8px;
     padding: 8px 16px;
     font-size: 14px;
     color: #333;
     background: linear-gradient(to bottom, #f6f6f6, #ededed);
-    border: 1px solid #ccc;
-    border-radius: 4px;
+    border: none;
+    border-right: 1px solid #ccc;
     box-shadow: inset 0 1px 0 white;
   }
   .list {
