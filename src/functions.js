@@ -18,6 +18,7 @@ export function loadImage(url) {
       const img = document.createElement('img')
       img.src = url;
       img.onload = () => resolve(img);
+      img.onerror = () => resolve(null);
     } catch (ex) {
       reject(ex);
     }

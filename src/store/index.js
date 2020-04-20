@@ -54,7 +54,7 @@ export default new Vuex.Store({
       state.bufferSelected = state.bufferSelected.concat(cutted);
     },
     addImages(state, imgs) {
-      imgs.forEach((img) => {
+      imgs.filter(Boolean).forEach((img) => {
         state.images.push({
           src: img.src,
           width: img.width,
