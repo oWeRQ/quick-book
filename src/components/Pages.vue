@@ -3,6 +3,7 @@
     <Pagination :total="pages.length" :near="2" v-model="offset" />
     <div class="book" @dragover="dragover($event)" @drop="drop($event)">
       <div v-for="(page, index) in visiblePages" :key="index" class="page" :style="pageStyle">
+        <div class="page-stack" :style="{left: (index % 2 === 0 ? -offset - 2 : pages.length - offset - 1) + 'px'}"></div>
         <transition-group name="image">
           <PageImage :class="{image: true, selected: selected.includes(item.image)}" v-for="item in page.items" :key="item.image.src" :item="item" :canAdd="hasSelected" :canCut="!selected.length || selected.includes(item.image)" @click="select($event, item.image)" @before="before(item.image)" @after="after(item.image)" @cut="cut(item.image)" />
         </transition-group>
@@ -192,6 +193,19 @@
     position: relative;
     background: white;
     box-shadow: 0 2px 8px rgba(0,0,0,.2);
+  }
+  .page:nth-of-type(2n) {
+    background: linear-gradient(to right, #ddd, white 8px);
+  }
+  .page-stack {
+    position: absolute;
+    z-index: -1;
+    box-sizing: border-box;
+    display: block;
+    width: 100%;
+    height: 100%;
+    background: repeating-linear-gradient(to right, #fff 1px, #fff 2px, #ddd 2px, #ddd 3px);
+    border: 1px solid #ddd;
   }
   .image {
     transform: scale(1);
