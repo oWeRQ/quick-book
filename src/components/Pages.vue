@@ -4,7 +4,7 @@
     <div class="book" @dragover="dragover($event)" @drop="drop($event)">
       <div v-for="(page, index) in visiblePages" :key="index" class="page" :style="pageStyle">
         <transition-group name="image">
-          <PageImage class="image" v-for="item in page.items" :key="item.image.src" :item="item" :canAdd="hasSelected" @before="before(item.image)" @after="after(item.image)" @cut="cut(item.image)" />
+          <PageImage :class="{image: true, selected: selected.includes(item.image)}" v-for="item in page.items" :key="item.image.src" :item="item" :canAdd="hasSelected" :canCut="!selected.length || selected.includes(item.image)" @click="select($event, item.image)" @before="before(item.image)" @after="after(item.image)" @cut="cut(item.image)" />
         </transition-group>
         <div class="rate">Rate: {{ page.rate.toFixed(2) }}</div>
       </div>
@@ -49,6 +49,7 @@
         min: 3,
         max: 6,
         offset: 0,
+        selected: [],
       };
     },
     computed: {
@@ -101,17 +102,52 @@
         this.insert(idx + 1);
         this.goto(this.images[idx + 1]);
       },
-      cut(image) {
+      toggleSelect(image) {
+        const selectedIdx = this.selected.indexOf(image);
+        if (selectedIdx !== -1) {
+          this.selected.splice(selectedIdx, 1);
+        } else {
+          this.selected.push(image);
+        }
+      },
+      select(e, image) {
         const idx = this.images.indexOf(image);
-        this.cutIndex(idx);
+
+        if (e.ctrlKey) {
+          this._selectStart = idx;
+          this.toggleSelect(image);
+        } else if (e.shiftKey) {
+          const [start, end] = (this._selectStart < idx ? [this._selectStart + 1, idx] : [idx, this._selectStart - 1]);
+          for (let i = start; i <= end; i++) {
+            this.toggleSelect(this.images[i]);
+          }
+        }
+      },
+      cut(image) {
+        let idx;
+
+        if (this.selected.length) {
+          const selected = this.images.filter((im) => this.selected.includes(im));
+          for (let sel of selected) {
+            idx = this.images.indexOf(sel);
+            this.cutIndex(idx);
+          }
+          this.selected = [];
+        } else {
+          idx = this.images.indexOf(image);
+          this.cutIndex(idx);
+        }
+        
         this.goto(this.images[idx - 1]);
       },
       add() {
+        const lastImage = this.images[this.images.length - 1];
         if (this.hasSelected) {
           this.append();
         } else {
           selectFile(true).then(this.addFiles);
         }
+        this.goto(lastImage);
       },
       dragover(e) {
         e.preventDefault();
@@ -160,6 +196,10 @@
   .image {
     transform: scale(1);
     transform-origin: center bottom;
+  }
+  .image.selected {
+    outline: 4px solid #3584e4;
+    transition: outline 0ms;
   }
   .image-enter,
   .image-leave-to {

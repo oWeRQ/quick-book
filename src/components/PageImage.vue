@@ -1,15 +1,15 @@
 <template>
-  <div class="wrap" :style="style">
+  <div class="wrap" :style="style" @click="$emit('click', $event)">
     <img :src="item.image.src">
     <div v-if="canAdd" class="action before" @click="$emit('before')">+</div>
     <div v-if="canAdd" class="action after" @click="$emit('after')">+</div>
-    <div class="action cut" @click="$emit('cut')">Cut</div>
+    <div v-if="canCut" class="action cut" @click="$emit('cut')">Cut</div>
   </div>
 </template>
 
 <script>
   export default {
-    props: ['item', 'canAdd'],
+    props: ['item', 'canAdd', 'canCut'],
     computed: {
       style() {
         return {
@@ -26,7 +26,7 @@
 <style scoped>
   .wrap {
     position: absolute;
-    transition: linear 300ms;
+    transition: all 300ms linear;
   }
 
   img {
