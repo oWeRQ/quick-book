@@ -156,8 +156,8 @@
       },
       drop(e) {
         e.preventDefault();
-        loadImage(e.dataTransfer.getData('text')).then((img) => this.addImages([img]));
         this.addFiles(e.dataTransfer.files);
+        loadImage(e.dataTransfer.getData('text')).then((img) => this.addImages([img]));
       },
       addFiles(files) {
         loadFiles(files).then((imgs) => {
