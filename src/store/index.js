@@ -27,6 +27,11 @@ export default new Vuex.Store({
         state.bufferSelected = state.bufferSelected.concat([image]);
       }
     },
+    bufferSelectRange(state, [start, end]) {
+      for (let i = start; i <= end; i++) {
+        this.commit('bufferSelect', state.bufferImages[i]);
+      }
+    },
     bufferSelectAll(state) {
       if (state.bufferImages.length === state.bufferSelected.length) {
         state.bufferSelected = [];

@@ -2,12 +2,15 @@
   <div class="buffer" v-if="images.length">
     <div class="panel">
       <div class="actions">
-        <button @click="selectAll"><span :class="{checkbox: true, checked: isSelectedAll}"></span> Select All</button>
-        <button @click="append" :disabled="!hasSelected">Add Selected</button>
-        <button @click="remove" :disabled="!hasSelected">Remove Selected</button>
+        <button @click="selectAll"><span :class="{checkbox: true, checked: isSelectedAll}"></span> {{ isSelectedAll ? 'Reset Selection' : `Select All (${images.length})` }}</button>
+        <button @click="append" :disabled="!hasSelected">Add Selected ({{ selected.length }})</button>
+        <button @click="remove" :disabled="!hasSelected">Remove Selected ({{ selected.length }})</button>
+        <div class="status">
+          Selected {{ selected.length }} of {{ images.length }}
+        </div>
       </div>
       <div class="list">
-        <img v-for="image in images" :key="image.src" :src="image.src" @click="select(image)" :class="{image: true, selected: selected.includes(image)}">
+        <img v-for="image in images" :key="image.src" :src="image.src" @click="select($event, image)" :class="{image: true, selected: selected.includes(image)}">
       </div>
     </div>
   </div>
@@ -29,11 +32,20 @@
     },
     methods: {
       ...mapMutations({
-        select: 'bufferSelect',
         selectAll: 'bufferSelectAll',
         remove: 'bufferRemove',
         append: 'append',
       }),
+      select(e, image) {
+        const idx = this.images.indexOf(image);
+        if (e.shiftKey) {
+          const range = (this._selectStart < idx ? [this._selectStart + 1, idx] : [idx, this._selectStart - 1]);
+          this.$store.commit('bufferSelectRange', range);
+        } else {
+          this._selectStart = idx;
+          this.$store.commit('bufferSelect', image);
+        }
+      },
     },
   }
 </script>
@@ -65,6 +77,12 @@
     box-shadow: inset 0 1px 0 white;
   }
   .actions button[disabled] {
+    color: #999;
+  }
+  .actions .status {
+    align-self: center;
+    margin-left: auto;
+    margin-right: 8px;
     color: #999;
   }
   .list {
