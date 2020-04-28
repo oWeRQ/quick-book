@@ -11,6 +11,7 @@
       </div>
       <div v-if="hasNewPage" class="page" :style="pageStyle">
         <div class="add" @click="add()">+</div>
+        <progress v-if="progress.max" class="progress" :max="progress.max" :value="progress.value"></progress>
       </div>
     </div>
     <div class="count">
@@ -51,6 +52,10 @@
         max: 6,
         offset: 0,
         selected: [],
+        progress: {
+          value: 0,
+          max: 0,
+        },
       };
     },
     computed: {
@@ -160,11 +165,17 @@
         loadImage(e.dataTransfer.getData('text')).then((img) => this.addImages([img]));
       },
       addFiles(files) {
-        loadFiles(files).then((imgs) => {
+        this.gotoLast();
+        loadFiles(files, this.showProgress).then((imgs) => {
           const lastImage = this.images[this.images.length - 1];
           this.addImages(imgs);
           this.goto(lastImage);
+          this.progress.max = 0;
         });
+      },
+      showProgress(value, max) {
+        this.progress.value = value;
+        this.progress.max = max;
       },
     },
     components: {
@@ -239,6 +250,12 @@
   }
   .add:hover {
     opacity: 0.8;
+  }
+  .progress {
+    position: absolute;
+    left: 25%;
+    top: calc(50% + 64px);
+    width: 50%;
   }
   .rate {
     position: absolute;

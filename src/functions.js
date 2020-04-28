@@ -1,3 +1,16 @@
+export function progressPromiseAll(promises, onprogress) {
+  if (typeof onprogress === 'function') {
+    const total = promises.length;
+    let progress = 0;
+
+    for (let promise of promises) {
+      promise.then((result) => onprogress(++progress, total, result));
+    }
+  }
+
+  return Promise.all(promises);
+}
+
 export function selectFile(multiple) {
   return new Promise(function(resolve, reject) {
     try {
@@ -25,6 +38,6 @@ export function loadImage(url) {
   });
 }
 
-export function loadFiles(files) {
-  return Promise.all([...files].map((file) => loadImage(URL.createObjectURL(file))));
+export function loadFiles(files, onprogress) {
+  return progressPromiseAll([...files].map((file) => loadImage(URL.createObjectURL(file))), onprogress);
 }
