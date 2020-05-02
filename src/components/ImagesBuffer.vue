@@ -2,9 +2,9 @@
   <div class="buffer" v-if="images.length">
     <div class="panel">
       <div class="actions">
-        <button @click="selectAll"><span :class="{checkbox: true, checked: isSelectedAll}"></span> {{ isSelectedAll ? 'Reset Selection' : `Select All (${images.length})` }}</button>
-        <button @click="append" :disabled="!hasSelected">Add Selected ({{ selected.length }})</button>
-        <button @click="remove" :disabled="!hasSelected">Remove Selected ({{ selected.length }})</button>
+        <button @click="bufferSelectAll"><span :class="{checkbox: true, checked: isSelectedAll}"></span> {{ isSelectedAll ? 'Reset Selection' : `Select All (${images.length})` }}</button>
+        <button @click="appendBuffer" :disabled="!hasSelected">Add Selected ({{ selected.length }})</button>
+        <button @click="bufferRemove" :disabled="!hasSelected">Remove Selected ({{ selected.length }})</button>
         <div class="status">
           Selected {{ selected.length }} of {{ images.length }}
         </div>
@@ -32,9 +32,9 @@
     },
     methods: {
       ...mapMutations({
-        selectAll: 'bufferSelectAll',
-        remove: 'bufferRemove',
-        append: 'append',
+        bufferSelectAll: 'bufferSelectAll',
+        bufferRemove: 'bufferRemove',
+        appendBuffer: 'appendBuffer',
       }),
       select(e, image) {
         const idx = this.images.indexOf(image);
