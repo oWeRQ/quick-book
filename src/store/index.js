@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 
+import { immutableToggle } from '../functions';
 import { images } from '../demo';
 
 Vue.use(Vuex)
@@ -21,11 +22,7 @@ export default new Vuex.Store({
   },
   mutations: {
     bufferSelect(state, image) {
-      if (state.bufferSelected.includes(image)) {
-        state.bufferSelected = state.bufferSelected.filter((im) => im !== image);
-      } else {
-        state.bufferSelected = state.bufferSelected.concat([image]);
-      }
+      state.bufferSelected = immutableToggle(state.bufferSelected, image);
     },
     bufferSelectRange(state, [start, end]) {
       for (let i = start; i <= end; i++) {
@@ -45,29 +42,29 @@ export default new Vuex.Store({
     },
     append(state) {
       const selected = state.bufferImages.filter((im) => state.bufferSelected.includes(im));
-      state.images = state.images.concat(selected);
+      state.images = [...state.images, ...selected];
       this.commit('bufferRemove');
     },
     insert(state, idx) {
       const selected = state.bufferImages.filter((im) => state.bufferSelected.includes(im));
-      state.images.splice(idx, 0, ...selected);
+      state.images = [...state.images.slice(0, idx), ...selected, ...state.images.slice(idx)];
       this.commit('bufferRemove');
     },
-    cutIndex(state, idx) {
-      const cutted = state.images.splice(idx, 1);
-      state.bufferImages = state.bufferImages.concat(cutted);
-      state.bufferSelected = state.bufferSelected.concat(cutted);
+    cutImage(state, image) {
+      state.images = state.images.filter((im) => im !== image);
+      state.bufferImages = [...state.bufferImages, image];
+      state.bufferSelected = [...state.bufferSelected, image];
     },
     addImages(state, imgs) {
-      imgs.filter(Boolean).forEach((img) => {
-        state.images.push({
-          src: img.src,
-          width: img.width,
-          height: img.height,
-          ratio: img.width / img.height,
-          layout: {},
-        });
-      });
+      const images = imgs.filter(Boolean).map((img) => ({
+        src: img.src,
+        width: img.width,
+        height: img.height,
+        ratio: img.width / img.height,
+        layout: {},
+      }));
+
+      state.images = [...state.images, ...images];
     },
   },
   actions: {

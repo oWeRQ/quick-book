@@ -32,7 +32,7 @@
   import Pagination from './Pagination';
   import ImagesBuffer from './ImagesBuffer';
 
-  import { selectFile, loadImage, loadFiles } from '../functions';
+  import { immutableToggle, selectFile, loadImage, loadFiles } from '../functions';
 
   const scale = 0.6;
   const width = 210 * scale;
@@ -81,11 +81,22 @@
         return this.offset === (this.pages.length - this.pages.length % 2);
       },
     },
+    watch: {
+      images(newImages, oldImages) {
+        const len = Math.max(oldImages.length, newImages.length);
+        for (let i = 0; i < len; i++) {
+          if (oldImages[i] !== newImages[i]) {
+            this.goto(newImages[i] || newImages[i - 1]);
+            break;
+          }
+        } 
+      },
+    },
     methods: {
       ...mapMutations({
         append: 'append',
         insert: 'insert',
-        cutIndex: 'cutIndex',
+        cutImage: 'cutImage',
         addImages: 'addImages',
       }),
       gotoPage(page) {
@@ -101,20 +112,13 @@
       before(image) {
         const idx = this.images.indexOf(image);
         this.insert(idx);
-        this.goto(this.images[idx]);
       },
       after(image) {
         const idx = this.images.indexOf(image);
         this.insert(idx + 1);
-        this.goto(this.images[idx + 1]);
       },
       toggleSelect(image) {
-        const selectedIdx = this.selected.indexOf(image);
-        if (selectedIdx !== -1) {
-          this.selected.splice(selectedIdx, 1);
-        } else {
-          this.selected.push(image);
-        }
+        this.selected = immutableToggle(this.selected, image);
       },
       select(e, image) {
         const idx = this.images.indexOf(image);
@@ -130,30 +134,23 @@
         }
       },
       cut(image) {
-        let idx;
-
         if (this.selected.length) {
-          const selected = this.images.filter((im) => this.selected.includes(im));
-          for (let sel of selected) {
-            idx = this.images.indexOf(sel);
-            this.cutIndex(idx);
+          for (let im of this.images) {
+            if (this.selected.includes(im)) {
+              this.cutImage(im);
+            }
           }
           this.selected = [];
         } else {
-          idx = this.images.indexOf(image);
-          this.cutIndex(idx);
+          this.cutImage(image);
         }
-        
-        this.goto(this.images[idx - 1]);
       },
       add() {
-        const lastImage = this.images[this.images.length - 1];
         if (this.hasSelected) {
           this.append();
         } else {
           selectFile(true).then(this.addFiles);
         }
-        this.goto(lastImage);
       },
       dragover(e) {
         e.preventDefault();
@@ -167,15 +164,16 @@
       addFiles(files) {
         this.gotoLast();
         loadFiles(files, this.showProgress).then((imgs) => {
-          const lastImage = this.images[this.images.length - 1];
           this.addImages(imgs);
-          this.goto(lastImage);
-          this.progress.max = 0;
+          this.hideProgress();
         });
       },
       showProgress(value, max) {
         this.progress.value = value;
         this.progress.max = max;
+      },
+      hideProgress() {
+        this.showProgress(0, 0);
       },
     },
     components: {

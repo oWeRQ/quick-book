@@ -1,10 +1,14 @@
+export function immutableToggle(arr, item) {
+  return (arr.includes(item) ? arr.filter(i => i !== item) : [ ...arr, item]);
+}
+
 export function progressPromiseAll(promises, onprogress) {
   if (typeof onprogress === 'function') {
     const total = promises.length;
     let progress = 0;
 
     for (let promise of promises) {
-      promise.then((result) => onprogress(++progress, total, result));
+      promise.then(() => onprogress(++progress, total));
     }
   }
 
@@ -17,7 +21,7 @@ export function selectFile(multiple) {
       const input = document.createElement('input');
       input.type = 'file';
       input.multiple = multiple || false;
-      input.onchange = (e)  => resolve(e.target.files || []);
+      input.onchange = (e) => resolve(e.target.files || []);
       input.click();
     } catch (ex) {
       reject(ex);
@@ -39,5 +43,6 @@ export function loadImage(url) {
 }
 
 export function loadFiles(files, onprogress) {
+  onprogress(0, files.length);
   return progressPromiseAll([...files].map((file) => loadImage(URL.createObjectURL(file))), onprogress);
 }
