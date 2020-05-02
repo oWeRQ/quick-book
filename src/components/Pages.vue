@@ -5,7 +5,17 @@
       <div v-for="(page, index) in visiblePages" :key="index" class="page" :style="pageStyle">
         <div class="page-stack" :style="{left: (index % 2 === 0 ? -offset - 2 : pages.length - offset - 1) + 'px'}"></div>
         <transition-group name="image">
-          <PageImage :class="{image: true, selected: selected.includes(item.image)}" v-for="item in page.items" :key="item.image.src" :item="item" :canAdd="hasSelected" :canCut="!selected.length || selected.includes(item.image)" @click="select($event, item.image)" @before="before(item.image)" @after="after(item.image)" @cut="cut(item.image)" />
+          <PageImage v-for="item in page.items"
+            :key="item.image.src"
+            :class="{image: true, selected: selected.includes(item.image)}"
+            :item="item"
+            :canAdd="hasBufferSelected"
+            :canCut="!selected.length || selected.includes(item.image)"
+            @click="select($event, item.image)"
+            @before="beforeImage(item.image)"
+            @after="afterImage(item.image)"
+            @cut="cut(item.image)"
+          />
         </transition-group>
         <div class="rate">Rate: {{ page.rate.toFixed(2) }}</div>
       </div>
@@ -63,7 +73,7 @@
         images: 'images',
       }),
       ...mapGetters({
-        hasSelected: 'hasBufferSelected',
+        hasBufferSelected: 'hasBufferSelected',
       }),
       pageStyle() {
         return {
@@ -86,7 +96,7 @@
         const len = Math.max(oldImages.length, newImages.length);
         for (let i = 0; i < len; i++) {
           if (oldImages[i] !== newImages[i]) {
-            this.goto(newImages[i] || newImages[i - 1]);
+            this.gotoImage(newImages[i] || newImages[i - 1]);
             break;
           }
         } 
@@ -94,9 +104,10 @@
     },
     methods: {
       ...mapMutations({
-        append: 'append',
-        insert: 'insert',
-        cutImage: 'cutImage',
+        appendBuffer: 'appendBuffer',
+        beforeImage: 'beforeImage',
+        afterImage: 'afterImage',
+        cutImages: 'cutImages',
         addImages: 'addImages',
       }),
       gotoPage(page) {
@@ -104,50 +115,35 @@
         this.offset = page - page % 2;
       },
       gotoLast() {
-        this.goto(this.images[this.images.length - 1]);
+        this.gotoPage(this.pages.length - 1);
       },
-      goto(image) {
+      gotoImage(image) {
         this.gotoPage(this.pages.findIndex((page) => page.items.some((item) => item.image === image)));
-      },
-      before(image) {
-        const idx = this.images.indexOf(image);
-        this.insert(idx);
-      },
-      after(image) {
-        const idx = this.images.indexOf(image);
-        this.insert(idx + 1);
-      },
-      toggleSelect(image) {
-        this.selected = immutableToggle(this.selected, image);
       },
       select(e, image) {
         const idx = this.images.indexOf(image);
 
         if (e.ctrlKey) {
           this._selectStart = idx;
-          this.toggleSelect(image);
+          this.selected = immutableToggle(this.selected, image);
         } else if (e.shiftKey) {
           const [start, end] = (this._selectStart < idx ? [this._selectStart + 1, idx] : [idx, this._selectStart - 1]);
           for (let i = start; i <= end; i++) {
-            this.toggleSelect(this.images[i]);
+            this.selected = immutableToggle(this.selected, this.images[i]);
           }
         }
       },
       cut(image) {
         if (this.selected.length) {
-          for (let im of this.images) {
-            if (this.selected.includes(im)) {
-              this.cutImage(im);
-            }
-          }
+          this.cutImages(this.selected);
           this.selected = [];
         } else {
-          this.cutImage(image);
+          this.cutImages([image]);
         }
       },
       add() {
-        if (this.hasSelected) {
-          this.append();
+        if (this.hasBufferSelected) {
+          this.appendBuffer();
         } else {
           selectFile(true).then(this.addFiles);
         }

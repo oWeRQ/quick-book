@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 
-import { immutableToggle } from '../functions';
+import { partition, immutableToggle } from '../functions';
 import { images } from '../demo';
 
 Vue.use(Vuex)
@@ -26,7 +26,7 @@ export default new Vuex.Store({
     },
     bufferSelectRange(state, [start, end]) {
       for (let i = start; i <= end; i++) {
-        this.commit('bufferSelect', state.bufferImages[i]);
+        state.bufferSelected = immutableToggle(state.bufferSelected, state.bufferImages[i]);
       }
     },
     bufferSelectAll(state) {
@@ -40,20 +40,30 @@ export default new Vuex.Store({
       state.bufferImages = state.bufferImages.filter((im) => !state.bufferSelected.includes(im));
       state.bufferSelected = [];
     },
-    append(state) {
-      const selected = state.bufferImages.filter((im) => state.bufferSelected.includes(im));
+    appendBuffer(state) {
+      let selected;
+      [state.bufferImages, selected] = partition(state.bufferImages, (im) => !state.bufferSelected.includes(im));
+      state.bufferSelected = [];
       state.images = [...state.images, ...selected];
-      this.commit('bufferRemove');
     },
-    insert(state, idx) {
-      const selected = state.bufferImages.filter((im) => state.bufferSelected.includes(im));
+    insertBufferAt(state, idx) {
+      let selected;
+      [state.bufferImages, selected] = partition(state.bufferImages, (im) => !state.bufferSelected.includes(im));
+      state.bufferSelected = [];
       state.images = [...state.images.slice(0, idx), ...selected, ...state.images.slice(idx)];
-      this.commit('bufferRemove');
     },
-    cutImage(state, image) {
-      state.images = state.images.filter((im) => im !== image);
-      state.bufferImages = [...state.bufferImages, image];
-      state.bufferSelected = [...state.bufferSelected, image];
+    beforeImage(state, image) {
+      const idx = state.images.indexOf(image);
+      this.commit('insertBufferAt', idx);
+    },
+    afterImage(state, image) {
+      const idx = state.images.indexOf(image);
+      this.commit('insertBufferAt', idx + 1);
+    },
+    cutImages(state, images) {
+      [state.images, images] = partition(state.images, (im) => !images.includes(im));
+      state.bufferImages = [...state.bufferImages, ...images];
+      state.bufferSelected = [...state.bufferSelected, ...images];
     },
     addImages(state, imgs) {
       const images = imgs.filter(Boolean).map((img) => ({
@@ -61,7 +71,6 @@ export default new Vuex.Store({
         width: img.width,
         height: img.height,
         ratio: img.width / img.height,
-        layout: {},
       }));
 
       state.images = [...state.images, ...images];

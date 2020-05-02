@@ -1,3 +1,13 @@
+export function partition(arr, callback) {
+  const result = [[], []];
+
+  for (let i in arr) {
+    result[callback(arr[i], i, arr) ? 0 : 1].push(arr[i]);
+  }
+
+  return result;
+}
+
 export function immutableToggle(arr, item) {
   return (arr.includes(item) ? arr.filter(i => i !== item) : [ ...arr, item]);
 }
